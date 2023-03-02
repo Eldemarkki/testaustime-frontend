@@ -11,6 +11,8 @@ import { PerProjectChart } from "./PerProjectChart";
 import { useAuthentication } from "../hooks/useAuthentication";
 import { useI18nContext } from "../i18n/i18n-react";
 import { useSettings } from "../hooks/useSettings";
+import CurrentStatus from "./CurrentStatus";
+import { useCurrentActivity } from "../hooks/useCurrentActivity";
 
 const useStyles = createStyles(theme => ({
   dataCard: {
@@ -81,6 +83,8 @@ export const Dashboard = ({ username, isFrontPage }: DashboardProps) => {
 
   const [prefix, infix, suffix] = LL.dashboard.noData.installPrompt().split("<link>");
 
+  const currentActivity = useCurrentActivity(username);
+
   if (!authenticatedUsername) {
     return <div>{LL.dashboard.notLoggedIn()}</div>;
   }
@@ -88,12 +92,16 @@ export const Dashboard = ({ username, isFrontPage }: DashboardProps) => {
   const isOwnDashboard = username === "@me";
 
   return (
-    <div style={{ width: "100%" }}>
+    <div style={{ width: "100%", display: "flex", flexDirection: "column" }}>
       {isFrontPage && <>
-        <Group style={{ marginBottom: "1rem" }}>
+        <Group mb={"1rem"}>
           <Text>{LL.dashboard.greeting({ username: isOwnDashboard ? authenticatedUsername : username })}</Text>
         </Group>
-        <Title mb={5}>{LL.dashboard.statistics()}</Title>
+        {currentActivity && <CurrentStatus
+          projectName={currentActivity.heartbeat.projectName}
+          since={currentActivity.started}
+        />}
+        <Title mb={5} mt="1rem">{LL.dashboard.statistics()}</Title>
       </>}
       <Group align="end" position="apart" mt={10} mb={30}>
         <MultiSelect
